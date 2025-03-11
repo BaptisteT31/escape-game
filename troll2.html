@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Teleport</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        #teleport-button {
+            position: absolute;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="teleport-button">Non spécifié</button>
+
+    <script>
+        const teleportButton = document.getElementById('teleport-button');
+        const teleportDistance = 200; // Distance minimale pour déclencher la téléportation
+
+        function getRandomPosition() {
+            const x = Math.random() * (window.innerWidth - teleportButton.offsetWidth);
+            const y = Math.random() * (window.innerHeight - teleportButton.offsetHeight);
+            return { x, y };
+        }
+
+        function teleportButtonFunc() {
+            const pos = getRandomPosition();
+            teleportButton.style.left = `${pos.x}px`;
+            teleportButton.style.top = `${pos.y}px`;
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            const rect = teleportButton.getBoundingClientRect();
+            const dx = e.clientX - (rect.left + rect.width / 2);
+            const dy = e.clientY - (rect.top + rect.height / 2);
+            const distance = Math.hypot(dx, dy);
+
+            if (distance < teleportDistance) {
+                teleportButtonFunc();
+            }
+        });
+
+        // Initialiser la position du bouton
+        teleportButtonFunc();
+    </script>
+</body>
+</html>
