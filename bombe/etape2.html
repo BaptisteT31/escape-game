@@ -42,7 +42,7 @@
       transform: translateX(-50%);
       background: rgba(0,0,0,0.8);
       padding: 15px; border-radius: 10px;
-      width: 80%;
+      width: 90%;
       max-width: 350px;
       z-index: 5;
     }
@@ -65,22 +65,22 @@
     }
 
     /* Explosion */
-    #flashOverlay, #explosionGif {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      display: none; z-index: 2000;
+    #explosionGif {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 250px; display: none;
+      z-index: 2000;
     }
-    #flashOverlay { background: white; opacity: 0; pointer-events: none; }
-    @keyframes flashEffect { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
-    #explosionGif { width: 250px; pointer-events: none; display: none; }
 
     /* Overlays */
     .overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(0,0,0,0.8);
       display: none; align-items: center; justify-content: center; z-index: 3000;
+      padding: 20px;
     }
     .box {
-      background: #333; padding: 20px; border-radius: 10px; text-align: center; width: 80%;
+      background: #333; padding: 20px; border-radius: 10px; text-align: center; width: 90%;
       max-width: 350px;
     }
     .box p {
@@ -115,9 +115,6 @@
     <img id="explosionGif" src="explosion.gif" alt="Explosion">
   </div>
 
-  <div id="flashOverlay"></div>
-
-  <!-- Overlay de victoire -->
   <div id="victoryOverlay" class="overlay">
     <div id="victoryBox" class="box">
       <p>Bravo ! Bombe désamorcée ! (+20 pts)</p>
@@ -125,7 +122,6 @@
     </div>
   </div>
 
-  <!-- Overlay de défaite -->
   <div id="defeatOverlay" class="overlay">
     <div id="defeatBox" class="box">
       <p>💥 BOOM ! La bombe a explosé ! (-25 pts)</p>
@@ -145,9 +141,8 @@
     const submitAnswer = document.getElementById('submitAnswer');
     const victoryOverlay = document.getElementById('victoryOverlay');
     const defeatOverlay = document.getElementById('defeatOverlay');
-    const victoryOkBtn = document.getElementById('victoryOk');
-    const defeatOkBtn = document.getElementById('defeatOk');
-    
+    const explosionGif = document.getElementById('explosionGif');
+
     function updateTimer() {
       const minutes = Math.floor(countdownTime / 60);
       const seconds = countdownTime % 60;
@@ -155,10 +150,12 @@
     }
 
     const countdownInterval = setInterval(() => {
-      if (!gameActive) return clearInterval(countdownInterval);
+      if (!gameActive) return;
       countdownTime--;
       updateTimer();
-      if (countdownTime <= 0) triggerExplosion();
+      if (countdownTime <= 0) {
+        triggerExplosion();
+      }
     }, 1000);
 
     submitAnswer.addEventListener('click', () => {
@@ -174,8 +171,11 @@
     function triggerExplosion() {
       gameActive = false;
       clearInterval(countdownInterval);
-      updateScore(-25);
-      defeatOverlay.style.display = "flex";
+      explosionGif.style.display = "block";
+      setTimeout(() => {
+        defeatOverlay.style.display = "flex";
+        updateScore(-25);
+      }, 1500);
     }
 
     function showVictory() {
@@ -200,8 +200,9 @@
         console.error("Erreur mise à jour score :", error);
       }
     }
-    victoryOkBtn.addEventListener('click', () => { window.location.href = `etape3.html?team_id=${teamId}`; });
-    defeatOkBtn.addEventListener('click', () => { window.location.href = `etape3.html?team_id=${teamId}`; });
+
+    document.getElementById('victoryOk').addEventListener('click', () => window.location.href = `etape3.html?team_id=${teamId}`);
+    document.getElementById('defeatOk').addEventListener('click', () => window.location.href = `etape3.html?team_id=${teamId}`);
 
     updateTimer();
   </script>
