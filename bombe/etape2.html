@@ -2,329 +2,209 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Jeu de désamorçage - Répondre à une question</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Étape 2 - Désamorçage de la bombe</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       overflow: hidden;
-      /* Fond initial : occupe toute la hauteur sans déformation */
       background: url('background2.jpg') no-repeat center center fixed;
-      background-size: auto 100%;
+      background-size: cover;
       color: #fff;
       text-align: center;
     }
-    h1 {
-      margin-top: 20px;
-    }
-    #indice {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-    }
-    /* Conteneur global */
-    #game {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-    }
-    /* Conteneur de la bombe, positionnée au centre à 1/3 du bas */
+    h1 { margin-top: 10px; font-size: 1.5em; }
+    #indice { font-size: 1.2em; margin-bottom: 15px; }
+
+    /* Conteneurs */
+    #game { position: relative; width: 100%; height: 100vh; }
     #bombContainer {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      bottom: 33%;
+      bottom: 40%;
       z-index: 2;
     }
-    #bomb {
-      width: 200px;
-      display: block;
-      position: relative;
-      z-index: 3; /* La bombe apparaît devant */
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    /* Timer centré sur la bombe */
+    #bomb { width: 180px; display: block; position: relative; }
     #timer {
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2em;
-      font-weight: bold;
-      background-color: rgba(0,0,0,0.5);
-      padding: 5px 10px;
-      border-radius: 5px;
-      z-index: 4;
+      font-size: 1.8em; font-weight: bold;
+      background: rgba(0,0,0,0.7); padding: 5px 15px;
+      border-radius: 5px; z-index: 4;
     }
-    /* Zone de question */
+    
+    /* Question responsive */
     #questionContainer {
-      position: absolute;
-      bottom: 15%;
-      left: 50%;
+      position: absolute; bottom: 10%; left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,0.6);
-      padding: 10px 20px;
-      border-radius: 10px;
+      background: rgba(0,0,0,0.8);
+      padding: 15px; border-radius: 10px;
+      width: 80%;
+      max-width: 350px;
       z-index: 5;
     }
     #questionText {
-      margin: 0 0 10px;
       font-size: 1.2em;
+      margin-bottom: 10px;
     }
     #answerInput {
-      padding: 5px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: none;
+      width: 90%;
+      padding: 8px; font-size: 1em;
+      border-radius: 5px; border: none;
+      display: block;
+      margin: 5px auto;
     }
     #submitAnswer {
-      padding: 5px 10px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      background: green;
-      color: white;
-      cursor: pointer;
-    }
-    /* Overlay flash pour l'explosion */
-    #flashOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
       width: 100%;
-      height: 100%;
-      background: white;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 2000;
-      display: none;
+      padding: 10px; font-size: 1em;
+      border: none; border-radius: 5px;
+      background: green; color: white; cursor: pointer;
     }
-    @keyframes flashEffect {
-      0% { opacity: 0; }
-      50% { opacity: 1; }
-      100% { opacity: 0; }
+
+    /* Explosion */
+    #flashOverlay, #explosionGif {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      display: none; z-index: 2000;
     }
-    /* GIF d'explosion centré */
-    #explosionGif {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 250px;
-      display: none;
-      pointer-events: none;
-      z-index: 2500;
+    #flashOverlay { background: white; opacity: 0; pointer-events: none; }
+    @keyframes flashEffect { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+    #explosionGif { width: 250px; pointer-events: none; display: none; }
+
+    /* Overlays */
+    .overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none; align-items: center; justify-content: center; z-index: 3000;
     }
-    /* Overlay de victoire */
-    #victoryOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 3000;
+    .box {
+      background: #333; padding: 20px; border-radius: 10px; text-align: center; width: 80%;
+      max-width: 350px;
     }
-    #victoryBox {
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
+    .box p {
+      margin: 0 0 10px; font-size: 1.4em; font-weight: bold;
     }
-    #victoryBox p {
-      margin: 0 0 10px;
-      font-size: 1.5em;
-      font-weight: bold;
+    .box button {
+      padding: 10px 15px; font-size: 1em; border: none;
+      border-radius: 5px; cursor: pointer; width: 100%;
     }
-    #victoryBox button {
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      background: green;
-      color: #fff;
-      cursor: pointer;
-    }
-    /* Overlay de défaite */
-    #defeatOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 3000;
-    }
-    #defeatBox {
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
-    #defeatBox p {
-      margin: 0 0 10px;
-      font-size: 1.5em;
-      font-weight: bold;
-    }
-    #defeatBox button {
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      background: red;
-      color: #fff;
-      cursor: pointer;
-    }
+    #victoryBox button { background: green; color: #fff; }
+    #defeatBox button { background: red; color: #fff; }
+
   </style>
 </head>
 <body>
-  <h1>Désamorcage de la bombe</h1>
-  <div id="indice">Indice : Répondez à la question pour désamorcer la bombe.</div>
+
+  <h1>Étape 2 - Désamorçage de la bombe</h1>
+  <div id="indice">Indice : Répondez à la question en moins de 60s !</div>
   
   <div id="game">
     <div id="bombContainer">
-      <!-- Bombe -->
       <img id="bomb" src="bomb.png" alt="Bombe">
-      <!-- Timer centré -->
-      <div id="timer">00:30</div>
+      <div id="timer">01:00</div>
     </div>
-    <!-- Zone de question -->
+    
     <div id="questionContainer">
       <p id="questionText">Quel est le résultat de 2 + 2 ?</p>
       <input type="text" id="answerInput" placeholder="Votre réponse">
       <button id="submitAnswer">Valider</button>
     </div>
-    <!-- GIF d'explosion -->
+    
     <img id="explosionGif" src="explosion.gif" alt="Explosion">
   </div>
-  
-  <!-- Overlay flash pour l'explosion -->
+
   <div id="flashOverlay"></div>
-  
+
   <!-- Overlay de victoire -->
-  <div id="victoryOverlay">
-    <div id="victoryBox">
-      <p>Bravo, tu as désamorcé la bombe !</p>
-      <button id="victoryOk">OK</button>
+  <div id="victoryOverlay" class="overlay">
+    <div id="victoryBox" class="box">
+      <p>Bravo ! Bombe désamorcée ! (+20 pts)</p>
+      <button id="victoryOk">Passer à l'étape 3</button>
     </div>
   </div>
-  
+
   <!-- Overlay de défaite -->
-  <div id="defeatOverlay">
-    <div id="defeatBox">
-      <p>Dommage, la bombe a explosé !</p>
-      <button id="defeatOk">OK</button>
+  <div id="defeatOverlay" class="overlay">
+    <div id="defeatBox" class="box">
+      <p>💥 BOOM ! La bombe a explosé ! (-25 pts)</p>
+      <button id="defeatOk">Passer à l'étape 3</button>
     </div>
   </div>
-  
+
   <script>
+    const API_URL = "https://escape-game-backend-71zo.onrender.com";
+    const urlParams = new URLSearchParams(window.location.search);
+    const teamId = urlParams.get('team_id');
+
     let gameActive = true;
-    let countdownTime = 60; // 60 secondes pour désamorcer
+    let countdownTime = 60;
     const timerDisplay = document.getElementById('timer');
-    const bombImage = document.getElementById('bomb');
-    const explosionGif = document.getElementById('explosionGif');
-    const questionContainer = document.getElementById('questionContainer');
     const answerInput = document.getElementById('answerInput');
     const submitAnswer = document.getElementById('submitAnswer');
-    
     const victoryOverlay = document.getElementById('victoryOverlay');
-    const victoryOkBtn = document.getElementById('victoryOk');
-    
     const defeatOverlay = document.getElementById('defeatOverlay');
+    const victoryOkBtn = document.getElementById('victoryOk');
     const defeatOkBtn = document.getElementById('defeatOk');
-    
-    const flashOverlay = document.getElementById('flashOverlay');
     
     function updateTimer() {
       const minutes = Math.floor(countdownTime / 60);
       const seconds = countdownTime % 60;
-      timerDisplay.textContent = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+      timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
-    
+
     const countdownInterval = setInterval(() => {
-      if (!gameActive) {
-        clearInterval(countdownInterval);
-        return;
-      }
+      if (!gameActive) return clearInterval(countdownInterval);
       countdownTime--;
       updateTimer();
-      if (countdownTime <= 0) {
-        setTimeout(() => { triggerExplosion("Boom ! Le temps est écoulé, la bombe a explosé !"); }, 1000);
-      }
+      if (countdownTime <= 0) triggerExplosion();
     }, 1000);
-    
+
     submitAnswer.addEventListener('click', () => {
       if (!gameActive) return;
-      const userAnswer = answerInput.value.trim();
-      // La réponse correcte est "4"
-      if (userAnswer === "4") {
-        setTimeout(() => {
-          // Changer le fond par l'image de victoire
-          document.body.style.backgroundImage = "url('victory_bg.jpg')";
-          // Masquer la bombe, le timer et la zone de question
-          bombImage.style.display = "none";
-          timerDisplay.style.display = "none";
-          questionContainer.style.display = "none";
-          clearInterval(countdownInterval);
-          // Attendre 1,5s après la fin des effets pour afficher la victoire
-          setTimeout(() => {
-            victoryOverlay.style.display = "flex";
-          }, 1500);
-        }, 1000);
+      if (answerInput.value.trim() === "4") {
+        updateScore(20);
+        showVictory();
       } else {
-        setTimeout(() => { triggerExplosion("Boom ! Mauvaise réponse, la bombe a explosé !"); }, 1000);
+        triggerExplosion();
       }
     });
-    
-    victoryOkBtn.addEventListener('click', () => {
-      victoryOverlay.style.display = "none";
-      // Optionnel : recharger la page pour recommencer
-      // location.reload();
-    });
-    
-    defeatOkBtn.addEventListener('click', () => {
-      defeatOverlay.style.display = "none";
-      // Optionnel : recharger la page pour recommencer
-      // location.reload();
-    });
-    
-    function triggerExplosion(msg) {
+
+    function triggerExplosion() {
       gameActive = false;
-      // Masquer la zone de question
-      questionContainer.style.display = "none";
-      
-      flashOverlay.style.display = "block";
-      flashOverlay.style.animation = "flashEffect 1s forwards";
-      
-      setTimeout(() => {
-        explosionGif.style.display = "block";
-      }, 500);
-      
-      setTimeout(() => {
-        bombImage.style.display = "none";
-        timerDisplay.style.display = "none";
-        document.body.style.backgroundImage = "url('explosion_bg2.jpg')";
-      }, 800);
-      
-      setTimeout(() => {
-        flashOverlay.style.display = "none";
-        explosionGif.style.display = "none";
-      }, 1000);
-      
       clearInterval(countdownInterval);
-      // Afficher l'overlay de défaite 1,5s après la fin des effets (total environ 2,5s)
-      setTimeout(() => {
-        defeatOverlay.style.display = "flex";
-      }, 2500);
+      updateScore(-25);
+      defeatOverlay.style.display = "flex";
     }
-    
+
+    function showVictory() {
+      gameActive = false;
+      clearInterval(countdownInterval);
+      victoryOverlay.style.display = "flex";
+    }
+
+    async function updateScore(points) {
+      try {
+        await fetch(`${API_URL}/update_score`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ team_id: teamId, score: points })
+        });
+        await fetch(`${API_URL}/validate_step`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ team_id: teamId })
+        });
+      } catch (error) {
+        console.error("Erreur mise à jour score :", error);
+      }
+    }
+    victoryOkBtn.addEventListener('click', () => { window.location.href = `etape3.html?team_id=${teamId}`; });
+    defeatOkBtn.addEventListener('click', () => { window.location.href = `etape3.html?team_id=${teamId}`; });
+
     updateTimer();
   </script>
+
 </body>
 </html>
