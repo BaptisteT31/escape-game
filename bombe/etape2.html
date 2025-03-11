@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Jeu de désamorçage - Victoire/ Défaite différée</title>
+  <title>Jeu de désamorçage - Répondre à une question</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -22,13 +22,13 @@
       font-size: 1.2em;
       margin-bottom: 20px;
     }
-    /* Conteneur global du jeu */
+    /* Conteneur global */
     #game {
       position: relative;
       width: 100%;
       height: 100vh;
     }
-    /* Bombe positionnée au centre, à 1/3 du bas */
+    /* Conteneur de la bombe, positionnée au centre à 1/3 du bas */
     #bombContainer {
       position: absolute;
       left: 50%;
@@ -40,7 +40,7 @@
       width: 200px;
       display: block;
       position: relative;
-      z-index: 3; /* La bombe apparaît devant les fils */
+      z-index: 3; /* La bombe apparaît devant */
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
     /* Timer centré sur la bombe */
@@ -56,42 +56,35 @@
       border-radius: 5px;
       z-index: 4;
     }
-    /* Conteneur des fils positionné à gauche de la bombe,
-       chevauchant légèrement (20px) l'image de la bombe */
-    #wiresContainer {
+    /* Zone de question */
+    #questionContainer {
       position: absolute;
-      right: calc(100% - 20px);
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      z-index: 1;
+      bottom: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      padding: 10px 20px;
+      border-radius: 10px;
+      z-index: 5;
     }
-    /* Chaque fil est constitué de deux parties égales */
-    .wire {
-      display: flex;
-      width: 150px;
-      height: 8px; /* fil fin */
+    #questionText {
+      margin: 0 0 10px;
+      font-size: 1.2em;
+    }
+    #answerInput {
+      padding: 5px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+    }
+    #submitAnswer {
+      padding: 5px 10px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      background: green;
+      color: white;
       cursor: pointer;
-    }
-    .wire .wire-left,
-    .wire .wire-right {
-      width: 50%;
-      height: 100%;
-      background-color: var(--wire-color);
-    }
-    /* Par défaut, les deux parties sont collées */
-    .wire .wire-right {
-      margin-left: 0;
-    }
-    /* Lorsqu'on coupe, on déplace la partie gauche vers la gauche pour simuler une coupure réelle */
-    .wire.cut .wire-left {
-      animation: moveLeft 1s forwards;
-    }
-    @keyframes moveLeft {
-      from { transform: translateX(0); }
-      to { transform: translateX(-15px); }
     }
     /* Overlay flash pour l'explosion */
     #flashOverlay {
@@ -121,43 +114,6 @@
       display: none;
       pointer-events: none;
       z-index: 2500;
-    }
-    /* Overlay de confirmation personnalisé */
-    #confirmationOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1500;
-    }
-    #confirmationBox {
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
-    #confirmationBox p {
-      margin: 0 0 10px;
-    }
-    #confirmationBox button {
-      margin: 0 10px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #confirmationBox button#confirmYes {
-      background-color: green;
-      color: #fff;
-    }
-    #confirmationBox button#confirmNo {
-      background-color: red;
-      color: #fff;
     }
     /* Overlay de victoire */
     #victoryOverlay {
@@ -229,7 +185,7 @@
 </head>
 <body>
   <h1>Désamorcage de la bombe</h1>
-  <div id="indice">Indice : Coupe le fil <strong>bleu</strong> pour désamorcer la bombe.</div>
+  <div id="indice">Indice : Répondez à la question pour désamorcer la bombe.</div>
   
   <div id="game">
     <div id="bombContainer">
@@ -237,37 +193,19 @@
       <img id="bomb" src="bomb.png" alt="Bombe">
       <!-- Timer centré -->
       <div id="timer">00:30</div>
-      <!-- Conteneur des fils (placé à gauche, chevauchant légèrement la bombe) -->
-      <div id="wiresContainer">
-        <div class="wire" data-color="rouge" style="--wire-color: red;">
-          <div class="wire-left"></div>
-          <div class="wire-right"></div>
-        </div>
-        <div class="wire" data-color="bleu" style="--wire-color: blue;">
-          <div class="wire-left"></div>
-          <div class="wire-right"></div>
-        </div>
-        <div class="wire" data-color="jaune" style="--wire-color: yellow;">
-          <div class="wire-left"></div>
-          <div class="wire-right"></div>
-        </div>
-      </div>
-      <!-- GIF d'explosion -->
-      <img id="explosionGif" src="explosion.gif" alt="Explosion">
     </div>
+    <!-- Zone de question -->
+    <div id="questionContainer">
+      <p id="questionText">Quel est le résultat de 2 + 2 ?</p>
+      <input type="text" id="answerInput" placeholder="Votre réponse">
+      <button id="submitAnswer">Valider</button>
+    </div>
+    <!-- GIF d'explosion -->
+    <img id="explosionGif" src="explosion.gif" alt="Explosion">
   </div>
   
   <!-- Overlay flash pour l'explosion -->
   <div id="flashOverlay"></div>
-  
-  <!-- Overlay de confirmation personnalisé -->
-  <div id="confirmationOverlay">
-    <div id="confirmationBox">
-      <p id="confirmationText"></p>
-      <button id="confirmYes">Oui</button>
-      <button id="confirmNo">Non</button>
-    </div>
-  </div>
   
   <!-- Overlay de victoire -->
   <div id="victoryOverlay">
@@ -280,27 +218,20 @@
   <!-- Overlay de défaite -->
   <div id="defeatOverlay">
     <div id="defeatBox">
-      <p>Dommage, tu as perdu ! La bombe a explosé !</p>
+      <p>Dommage, la bombe a explosé !</p>
       <button id="defeatOk">OK</button>
     </div>
   </div>
-  
-  <div id="message"></div>
   
   <script>
     let gameActive = true;
     let countdownTime = 30; // 30 secondes pour désamorcer
     const timerDisplay = document.getElementById('timer');
-    const wires = document.querySelectorAll('.wire');
     const bombImage = document.getElementById('bomb');
     const explosionGif = document.getElementById('explosionGif');
-    const messageDiv = document.getElementById('message');
-    const wiresContainer = document.getElementById('wiresContainer');
-    
-    const confirmationOverlay = document.getElementById('confirmationOverlay');
-    const confirmationText = document.getElementById('confirmationText');
-    const confirmYesBtn = document.getElementById('confirmYes');
-    const confirmNoBtn = document.getElementById('confirmNo');
+    const questionContainer = document.getElementById('questionContainer');
+    const answerInput = document.getElementById('answerInput');
+    const submitAnswer = document.getElementById('submitAnswer');
     
     const victoryOverlay = document.getElementById('victoryOverlay');
     const victoryOkBtn = document.getElementById('victoryOk');
@@ -308,7 +239,7 @@
     const defeatOverlay = document.getElementById('defeatOverlay');
     const defeatOkBtn = document.getElementById('defeatOk');
     
-    let selectedWire = null;
+    const flashOverlay = document.getElementById('flashOverlay');
     
     function updateTimer() {
       const minutes = Math.floor(countdownTime / 60);
@@ -328,43 +259,27 @@
       }
     }, 1000);
     
-    wires.forEach(wire => {
-      wire.addEventListener('click', () => {
-        if (!gameActive) return;
-        selectedWire = wire;
-        const color = wire.getAttribute('data-color');
-        confirmationText.textContent = `Voulez-vous couper le fil ${color} ?`;
-        confirmationOverlay.style.display = "flex";
-      });
-    });
-    
-    confirmYesBtn.addEventListener('click', () => {
-      confirmationOverlay.style.display = "none";
-      if (selectedWire) {
-        selectedWire.classList.add('cut');
-        const color = selectedWire.getAttribute('data-color');
+    submitAnswer.addEventListener('click', () => {
+      if (!gameActive) return;
+      const userAnswer = answerInput.value.trim();
+      // La réponse correcte est "4"
+      if (userAnswer === "4") {
         setTimeout(() => {
-          if (color === 'bleu') {
-            // Pour le bon fil, change le fond et attend 1.5s avant d'afficher la victoire
-            document.body.style.backgroundImage = "url('victory_bg.jpg')";
-            // Masquer bombe, timer et fils
-            bombImage.style.display = "none";
-            timerDisplay.style.display = "none";
-            wiresContainer.style.display = "none";
-            clearInterval(countdownInterval);
-            setTimeout(() => {
-              victoryOverlay.style.display = "flex";
-            }, 1000);
-          } else {
-            triggerExplosion("Boom ! La bombe a explosé !");
-          }
+          // Changer le fond par l'image de victoire
+          document.body.style.backgroundImage = "url('victory_bg.jpg')";
+          // Masquer la bombe, le timer et la zone de question
+          bombImage.style.display = "none";
+          timerDisplay.style.display = "none";
+          questionContainer.style.display = "none";
+          clearInterval(countdownInterval);
+          // Attendre 1,5s après la fin des effets pour afficher la victoire
+          setTimeout(() => {
+            victoryOverlay.style.display = "flex";
+          }, 1500);
         }, 1000);
+      } else {
+        setTimeout(() => { triggerExplosion("Boom ! Mauvaise réponse, la bombe a explosé !"); }, 1000);
       }
-    });
-    
-    confirmNoBtn.addEventListener('click', () => {
-      confirmationOverlay.style.display = "none";
-      selectedWire = null;
     });
     
     victoryOkBtn.addEventListener('click', () => {
@@ -381,10 +296,9 @@
     
     function triggerExplosion(msg) {
       gameActive = false;
-      messageDiv.textContent = msg;
-      wiresContainer.style.display = "none";
+      // Masquer la zone de question
+      questionContainer.style.display = "none";
       
-      const flashOverlay = document.getElementById("flashOverlay");
       flashOverlay.style.display = "block";
       flashOverlay.style.animation = "flashEffect 1s forwards";
       
@@ -404,10 +318,10 @@
       }, 1000);
       
       clearInterval(countdownInterval);
-      // Attendre 1.5s après la fin des effets (soit au total ~2.5s) pour afficher le message de défaite
+      // Afficher l'overlay de défaite 1,5s après la fin des effets (total environ 2,5s)
       setTimeout(() => {
         defeatOverlay.style.display = "flex";
-      }, 2000);
+      }, 2500);
     }
     
     updateTimer();
